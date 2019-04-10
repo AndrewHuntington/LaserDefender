@@ -7,11 +7,21 @@ public class Player : MonoBehaviour
 
 {
     // configuration parameters
+    [Header("Player")]
     [SerializeField] float moveSpeed = 10f; // use to adjust the speed of the ship
     [SerializeField] float padding = 1f;
+    [SerializeField] int health = 200;
+
+    [Header("Sound FX")]
+    [SerializeField] AudioClip deathSoundFX;
+    [SerializeField] [Range(0, 1)] float deathSoundVolume = 0.75f; //forces a range from 0 - 1
+    [SerializeField] AudioClip shootingSoundFX;
+    [SerializeField] [Range(0, 1)] float shootSoundVolume = 0.25f; //forces a range from 0 - 1
+
+    [Header("Projectile")]
     [SerializeField] GameObject laserPrefab;
     [SerializeField] float projectileSpeed = 10f;
-    [SerializeField] float projectileFiringPeriod = 0.1f;
+    [SerializeField] float projectileFiringPeriod = 0.2f;
 
     // capture our firing coroutine to make it easy to turn on and off w/o messing w/other coroutines
     Coroutine firingCoroutine;
@@ -57,6 +67,8 @@ public class Player : MonoBehaviour
                 transform.position,
                 Quaternion.identity) as GameObject;
             laser.GetComponent<Rigidbody2D>().velocity = new Vector2(0, projectileSpeed);
+            //PlayClipAtPoint = sound FX doesn't get cut off; volume parameter goes from 0 - 1
+            AudioSource.PlayClipAtPoint(shootingSoundFX, Camera.main.transform.position, shootSoundVolume);
             yield return new WaitForSeconds(projectileFiringPeriod);
         }
     }
@@ -78,6 +90,30 @@ public class Player : MonoBehaviour
         xMax = gameCamera.ViewportToWorldPoint(new Vector3(1, 0, 0)).x - padding;
         yMin = gameCamera.ViewportToWorldPoint(new Vector3(0, 0, 0)).y + padding;
         yMax = gameCamera.ViewportToWorldPoint(new Vector3(0, 1, 0)).y - padding;
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        DamageDealer damageDealer = other.gameObject.GetComponent<DamageDealer>();
+        if (!damageDealer) { return; } //protects against null (if other doesn't have a DamageDealer script attached to it)
+        ProcessHit(damageDealer);
+    }
+
+    private void ProcessHit(DamageDealer damageDealer)
+    {
+        health -= damageDealer.GetDamage();
+        damageDealer.Hit();
+        if (health <= 0)
+        {
+            Die();
+        }
+    }
+
+    private void Die()
+    {
+        Destroy(gameObject);
+        //PlayClipAtPoint = sound FX doesn't get cut off; volume parameter goes from 0 - 1
+        AudioSource.PlayClipAtPoint(deathSoundFX, Camera.main.transform.position, deathSoundVolume);
     }
 
 }
