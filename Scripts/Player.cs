@@ -111,9 +111,15 @@ public class Player : MonoBehaviour
 
     private void Die()
     {
+        FindObjectOfType<Level>().LoadGameOver();
         Destroy(gameObject);
         //PlayClipAtPoint = sound FX doesn't get cut off; volume parameter goes from 0 - 1
         AudioSource.PlayClipAtPoint(deathSoundFX, Camera.main.transform.position, deathSoundVolume);
+    }
+
+    public int GetHealth()
+    {
+        return health;
     }
 
 }

@@ -5,27 +5,24 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-    [Header("Enemy")]
+    [Header("Enemy Stats")]
     [SerializeField] float health = 100;
+    [SerializeField] int scoreValue = 150;
     [SerializeField] GameObject deathVFX;
     [SerializeField] float durationOfExplosion = 1f;
-
+    
     [Header("Sound FX")]
     [SerializeField] AudioClip deathSoundFX;
     [SerializeField] [Range(0,1)] float deathSoundVolume = 0.75f; //forces a range from 0 - 1
     [SerializeField] AudioClip shootingSoundFX;
     [SerializeField] [Range(0, 1)] float shootSoundVolume = 0.25f; //forces a range from 0 - 1
-
-
-    [Header("Projectile")]
+    
+    [Header("Shooting")]
     [SerializeField] GameObject projectile;
     [SerializeField] float projectileSpeed = 10f;
-
-    [Header("Fire Rate")]
-    [SerializeField] float shotCounter;
     [SerializeField] float minTimeBetweenShots = 0.2f;
     [SerializeField] float maxTimeBetweenShots = 3f;
-    
+    float shotCounter;
 
     // Start is called before the first frame update
     void Start()
@@ -78,6 +75,7 @@ public class Enemy : MonoBehaviour
 
     private void Die()
     {
+        FindObjectOfType<GameSession>().AddToScore(scoreValue);
         Destroy(gameObject);
         GameObject explosion = Instantiate(
                         deathVFX,
